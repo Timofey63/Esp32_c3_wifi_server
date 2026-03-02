@@ -1,14 +1,13 @@
 #include <Arduino.h>
 #include <WiFi.h>
 #include <WebServer.h>
+#include <WiFiManager.h>
 
 #include <html/pages.h>
 #include <app_state.h>
 #include <config.h>
 
 AppState appState;
-const char *ssid = "TP-Link_00E0";
-const char *password = "68860097";
 
 WebServer server(SERVER_PORT);
 
@@ -52,43 +51,34 @@ void handleNotFound()
   server.send(404, "text/plain", "404: Страница не найдена");
 }
 
+void saveConfigCallback() 
+{
+  Serial.println("Настройки Wi-Fi сохранены!");
+}
 
 void setup()
 {
   Serial.begin(115200);
-  delay(100);
 
   Serial.println("\n\n=== ESP32-C3 ВЕБ-СЕРВЕР ===");
 
   pinMode(LED_PIN, OUTPUT);
   digitalWrite(LED_PIN, LOW);
 
-  Serial.print("Подключение к Wi-Fi: ");
-  Serial.println(ssid);
-
-  WiFi.begin(ssid, password);
-
-  int attempts = 0;
-  while (WiFi.status() != WL_CONNECTED && attempts < 40)
-  {
-    delay(500);
-    Serial.print(".");
-    attempts++;
+  WiFiManager wm;
+  wm.setSaveConfigCallback(saveConfigCallback);
+  //wm.resetSettings();
+  bool connected = wm.autoConnect("ESP32-C3-Config", "12345678");
+  
+  if(!connected) {
+    Serial.println("Не удалось подключиться к Wi-Fi");
+    delay(10000);
+    ESP.restart();
   }
 
-  if (WiFi.status() == WL_CONNECTED)
-  {
-    Serial.println("\n Wi-Fi подключен!");
-    Serial.print(" IP адрес: ");
-    Serial.println(WiFi.localIP());
-    Serial.print(" Подключитесь по адресу: http://");
-    Serial.println(WiFi.localIP().toString());
-  }
-  else
-  {
-    Serial.println("\n Ошибка подключения к Wi-Fi!");
-    Serial.println("Проверьте SSID и пароль в коде.");
-  }
+  Serial.println("\n Wi-Fi подключен через WiFiManager");
+  Serial.print(" IP адрес: http://");
+  Serial.println(WiFi.localIP());
 
   server.on("/", handleRoot);        // Главная страница
   server.on("/on", handleOn);        // Включить LED
