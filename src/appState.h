@@ -6,3 +6,5 @@ struct AppState {
     bool wifiConnected;
     IPAddress ip;
 };
+
+extern AppState appState;
