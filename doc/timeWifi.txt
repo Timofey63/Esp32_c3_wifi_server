@@ -1,0 +1,30 @@
+#include <Arduino.h>
+#include <WiFi.h>
+#include <time.h>;
+
+
+void printTime()
+{
+    struct tm timeinfo;
+    if (!getLocalTime(&timeinfo)) {
+        Serial.println("Не удалось получить время");
+        return;
+    }
+
+    Serial.println(&timeinfo, "%d.%m.%Y %H:%M:%S");
+}
+
+void setup()
+{
+  Serial.begin(115200);
+  //должны быть данные о сети
+  configTime(4 * 3600, 0, "pool.ntp.org");
+  Serial.println("Вывод времени");
+}
+
+
+void loop()
+{
+  printTime();
+  delay(3000);
+}
