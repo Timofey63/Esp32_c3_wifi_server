@@ -2,14 +2,13 @@
 #include <WiFi.h>
 #include <WebServer.h>
 #include <WiFiManager.h>
+#include <LittleFS.h>
 
 #include <html/pages.h>
 #include <appState.h>
 #include <config.h>
 #include <web/web_server.h>
 AppState appState;
-
-void saveConfigCallback(){ Serial.println("Настройки Wi-Fi сохранены!"); }
 
 void setup()
 {
@@ -21,14 +20,21 @@ void setup()
   digitalWrite(LED_PIN, LOW);
 
   WiFiManager wm;
-  wm.setSaveConfigCallback(saveConfigCallback);
+  //wm.setSaveConfigCallback(saveConfigCallback);
   //wm.resetSettings();
   bool connected = wm.autoConnect("ESP32-C3-Config", "12345678");
   
-  if(!connected) {
+  if(!connected) 
+  {
     Serial.println("Не удалось подключиться к Wi-Fi");
     delay(10000);
     ESP.restart();
+  }
+  
+  if (!LittleFS.begin(true)) 
+  {
+    Serial.println("Ошибка LittleFS");
+    return;
   }
 
   Serial.print(" IP адрес: http://");
@@ -37,7 +43,6 @@ void setup()
   webInit();
   Serial.println(" Веб-сервер запущен!");
 }
-
 
 void loop()
 {
