@@ -48,19 +48,42 @@ void handleNotFound()
     server.send(404, "text/plain", "404: Страница не найдена");
 }
 
-void webInit()
+void serveCSS() 
 {
-    server.on("/css/style.css", [](){
     File file = LittleFS.open("/css/style.css", "r");
     if (!file) { server.send(404, "text/plain", "Not found"); return; }
     server.streamFile(file, "text/css");
-    file.close(); });
+    file.close();
+}
 
-    server.on("/js/script.js", [](){
+void serveJS() 
+{
     File file = LittleFS.open("/js/script.js", "r");
     if (!file) { server.send(404, "text/plain", "Not found"); return; }
     server.streamFile(file, "application/javascript");
-    file.close(); });
+    file.close();
+}
+
+void handleSendText() 
+{
+    if (server.hasArg("value")) 
+    {
+        String text = server.arg("value");
+        Serial.println(text);
+        server.send(200, "text/plain", "OK");
+    } 
+    else 
+    {
+        server.send(400, "text/plain", "No value");
+    }
+}
+
+void webInit()
+{
+   server.on("/css/style.css", serveCSS);
+    server.on("/js/script.js", serveJS);
+
+    server.on("/sendText", handleSendText);
 
     server.on("/", handleRoot);
     server.on("/on", handleOn);
