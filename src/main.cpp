@@ -4,7 +4,6 @@
 #include <WiFiManager.h>
 #include <LittleFS.h>
 
-#include <html/pages.h>
 #include <appState.h>
 #include <config.h>
 #include <web/web_server.h>
